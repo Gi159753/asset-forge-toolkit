@@ -3,22 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ASSET-FORGE-TOOLKIT</title>
+  <title>ASSET-FORGE-TOOLKIT
+</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>ASSET-FORGE-TOOLKIT</h1>
+      <div class="brand">
+        <p class="eyebrow">Local Browser Tools</p>
+        <h1>ASSET-FORGE-TOOLKIT</h1>
+      </div>
       <nav class="tool-tabs" aria-label="工具入口">
         <button class="tool-tab active" type="button" data-tool="cutoutTool">抠图工具</button>
         <button class="tool-tab" type="button" data-tool="spriteTool">视频转精灵图</button>
-        <button class="tool-tab" type="button" data-tool="pixelTool">像素风转换器 / Pixel Style Converter</button>
+        <button class="tool-tab" type="button" data-tool="pixelTool">像素风转换器</button>
       </nav>
     </header>
 
     <main id="cutoutTool">
       <aside>
+        <section class="tool-intro">
+          <h2>抠图工具</h2>
+          <p>删除背景并导出透明 PNG，适合图标、角色、道具和技能素材。</p>
+        </section>
         <div id="dropZone" class="drop-zone">
           拖拽图片到这里，或点击上方按钮导入。
         </div>
@@ -114,6 +122,10 @@
 
     <main id="spriteTool" hidden>
       <aside>
+        <section class="tool-intro">
+          <h2>视频转精灵图</h2>
+          <p>从视频均匀抽帧，生成序列帧、spritesheet 和 JSON 元数据。</p>
+        </section>
         <div id="videoDropZone" class="drop-zone">
           拖拽 mp4 / webm 到这里，或选择视频导入。
         </div>
@@ -189,6 +201,10 @@
 
     <main id="pixelTool" hidden>
       <aside>
+        <section class="tool-intro">
+          <h2>像素风转换器</h2>
+          <p>Pixel Style Converter</p>
+        </section>
         <div id="pixelDropZone" class="drop-zone">
           拖拽 PNG / JPG / WebP 到这里，或选择图片导入。
         </div>
