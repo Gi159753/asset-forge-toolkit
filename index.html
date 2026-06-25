@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LAN 的游戏素材工具箱</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>LAN 的游戏素材工具箱</h1>
+      <nav class="tool-tabs" aria-label="工具入口">
+        <button class="tool-tab active" type="button" data-tool="cutoutTool">抠图工具</button>
+        <button class="tool-tab" type="button" data-tool="spriteTool">视频转精灵图</button>
+        <button class="tool-tab" type="button" data-tool="pixelTool">像素风转换器 / Pixel Style Converter</button>
+      </nav>
+    </header>
+
+    <main id="cutoutTool">
+      <aside>
+        <div id="dropZone" class="drop-zone">
+          拖拽图片到这里，或点击上方按钮导入。
+        </div>
+        <div class="button-grid">
+          <label class="file-button" for="fileInput">选择图片</label>
+          <input id="fileInput" type="file" accept="image/*">
+          <button id="exportButton" class="primary" type="button" disabled>导出 PNG</button>
+        </div>
+
+        <section class="section">
+          <p class="section-title">模式</p>
+          <div class="mode-list">
+            <label>
+              <input type="radio" name="mode" value="black" checked>
+              <span>黑底去除</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="solid">
+              <span>纯色背景去除</span>
+            </label>
+            <label>
+              <input type="radio" name="mode" value="edge">
+              <span>边缘连通背景去除</span>
+            </label>
+          </div>
+          <p id="modeHint" class="hint">黑底模式会按像素亮度把接近黑色的区域转透明。</p>
+          <div class="sample-row">
+            <span>取样颜色</span>
+            <span id="sampleText">#000000</span>
+            <span id="sampleSwatch" class="swatch-list" aria-hidden="true"></span>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section-title">参数</p>
+          <div class="control" title="threshold 阈值：决定哪些颜色算作背景。数值越大，工具越宽松，会删除更多接近背景的像素；数值越小，工具越严格，只删除最像背景的部分。如果主体也被擦掉了，就把它调小；如果背景残留很多，就把它调大。">
+            <label for="threshold">threshold 阈值 <output id="thresholdValue">42</output></label>
+            <input id="threshold" type="range" min="0" max="255" value="42">
+          </div>
+          <div class="control" title="feather 羽化：让透明边缘更柔和。数值越大，边缘会从透明到不透明慢慢过渡，看起来不那么硬；数值越小，边缘更利落但可能有锯齿。如果边缘太生硬，就调大一点；如果主体边缘变糊，就调小。">
+            <label for="feather">feather 羽化 <output id="featherValue">18</output></label>
+            <input id="feather" type="range" min="0" max="120" value="18">
+          </div>
+          <div class="control" title="defringe 去边：减少主体边缘沾到的背景色。比如黑底抠图后边缘发黑，或纯色背景抠图后边缘带原背景颜色，可以调高它。数值太高可能让边缘颜色变怪，通常小幅调整就够。">
+            <label for="defringe">defringe 去边 <output id="defringeValue">25</output></label>
+            <input id="defringe" type="range" min="0" max="100" value="25">
+          </div>
+          <div class="control" title="alpha strength 透明强度：控制删除背景的力度。100 表示符合条件的背景尽量变透明；数值降低时，背景会保留一点半透明。一般导出透明图用 100；想保留轻微影子或烟雾时可以调低。">
+            <label for="alphaStrength">alpha strength 透明强度 <output id="alphaStrengthValue">100</output></label>
+            <input id="alphaStrength" type="range" min="0" max="100" value="100">
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section-title">查看</p>
+          <div class="control" title="zoom 缩放：只改变屏幕上的查看大小，不会改变图片本身，也不会影响导出的 PNG 尺寸。导入图片时会自动适应窗口完整显示；放大后可以按住鼠标中键拖动查看细节。">
+            <label for="zoom">zoom 缩放 <output id="zoomValue">100%</output></label>
+            <input id="zoom" type="range" min="1" max="400" step="1" value="100">
+          </div>
+          <div class="zoom-buttons" aria-label="缩放快捷按钮">
+            <button type="button" data-zoom="fit">适应</button>
+            <button type="button" data-zoom="100">100%</button>
+            <button type="button" data-zoom="200">200%</button>
+            <button type="button" data-zoom="400">400%</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>原图</span>
+            <span id="sourceInfo">未导入</span>
+          </div>
+          <div id="sourceWrap" class="canvas-wrap">
+            <canvas id="sourceCanvas"></canvas>
+            <div id="sourceEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>透明预览</span>
+            <span id="previewInfo">未导入</span>
+          </div>
+          <div id="previewWrap" class="canvas-wrap checker">
+            <canvas id="previewCanvas"></canvas>
+            <div id="previewEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <main id="spriteTool" hidden>
+      <aside>
+        <div id="videoDropZone" class="drop-zone">
+          拖拽 mp4 / webm 到这里，或选择视频导入。
+        </div>
+        <label class="file-button" for="videoInput">选择视频</label>
+        <input id="videoInput" type="file" accept="video/mp4,video/webm">
+
+        <section class="section">
+          <p class="section-title">参数</p>
+          <div class="control">
+            <label for="animationName">动画名称</label>
+            <input id="animationName" class="text-input" type="text" value="animation">
+          </div>
+          <div class="control" title="要从视频里均匀抽多少张图。默认 24 帧。">
+            <label for="frameCount">抽取帧数 <output>frame_count</output></label>
+            <input id="frameCount" class="text-input" type="number" min="1" max="240" step="1" value="24">
+          </div>
+          <div class="control" title="精灵图每一行放几帧。默认 6 列；24 帧时会自动得到 4 行。">
+            <label for="sheetColumns">每行列数 <output>columns</output></label>
+            <input id="sheetColumns" class="text-input" type="number" min="1" max="60" step="1" value="6">
+          </div>
+          <div class="control" title="行数会自动根据 抽取帧数 / 每行列数 计算，不需要手动填写，避免多出来一大片空白透明格子。">
+            <label>自动行数 <output>rows</output></label>
+            <input id="rowsValue" class="text-input" type="text" value="4" readonly>
+          </div>
+          <div class="control" title="只写入 JSON 元数据，方便游戏引擎知道这段动画每秒播放多少帧。不会影响抽帧速度。">
+            <label for="sheetFps">播放帧率 <output>fps</output></label>
+            <input id="sheetFps" class="text-input" type="number" min="1" max="240" step="1" value="24">
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section-title">生成</p>
+          <button id="extractButton" class="primary" type="button" disabled>抽帧生成</button>
+          <p id="videoInfo" class="hint">未导入视频</p>
+          <progress id="extractProgress" value="0" max="100"></progress>
+          <p id="progressText" class="hint">等待开始</p>
+        </section>
+
+        <section class="section">
+          <p class="section-title">下载</p>
+          <div class="button-grid">
+            <button id="downloadSheetButton" type="button" disabled>下载精灵图 PNG</button>
+            <button id="downloadJsonButton" type="button" disabled>下载 JSON</button>
+            <button id="downloadFramesButton" type="button" disabled>下载单帧 PNG zip</button>
+          </div>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>视频预览</span>
+            <span id="videoPreviewInfo">未导入</span>
+          </div>
+          <div class="canvas-wrap">
+            <video id="videoPreview" controls muted playsinline></video>
+            <div id="videoEmpty" class="empty">等待视频</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>精灵图预览</span>
+            <span id="sheetInfo">未生成</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="sheetCanvas" class="sheet-canvas"></canvas>
+            <div id="sheetEmpty" class="empty">等待生成</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <main id="pixelTool" hidden>
+      <aside>
+        <div id="pixelDropZone" class="drop-zone">
+          拖拽 PNG / JPG / WebP 到这里，或选择图片导入。
+        </div>
+        <label class="file-button" for="pixelInput">选择图片</label>
+        <input id="pixelInput" type="file" accept="image/png,image/jpeg,image/webp">
+        <p class="hint">像素风转换器 / Pixel Style Converter：用于把 AI 生成图、普通图片或伪像素图，转换成更接近游戏可用的像素风素材。支持经典像素、现代独游像素、HD Pixel 三种方向。</p>
+
+        <section class="section">
+          <p class="section-title">处理预设</p>
+          <div class="control" title="选择后会自动写入当前参数并刷新预览。默认不覆盖你手动输入的宽高，除非勾选预设同步尺寸。">
+            <label for="pixelPreset">处理预设</label>
+            <select id="pixelPreset" class="text-input">
+              <option value="classic">Classic Pixel / 经典像素</option>
+              <option value="modern" selected>Modern Pixel / 现代独游像素</option>
+              <option value="hd">HD Pixel / 高清像素</option>
+              <option value="vfx">VFX Pixel / 特效像素</option>
+            </select>
+          </div>
+          <div class="control" title="Advanced Clean 保留现有清理型像素化流程；Pixelit Style 使用更接近 Pixelit 的像素化加调色板映射流程。">
+            <label for="pixelAlgorithm">算法模式</label>
+            <select id="pixelAlgorithm" class="text-input">
+              <option value="advanced" selected>Advanced Clean</option>
+              <option value="pixelit">Pixelit Style</option>
+            </select>
+          </div>
+          <label class="check-row" title="开启后，切换预设会把像素宽度同步到预设推荐尺寸。高度仍遵守自动按比例或手动高度设置。">
+            <input id="presetSyncSize" type="checkbox">
+            <span>预设同步尺寸</span>
+          </label>
+        </section>
+
+        <section class="section">
+          <p class="section-title">基础参数</p>
+          <div class="control" title="输出小图的宽度，默认 64 像素。数值越小越像素化，数值越大越接近原图。">
+            <label for="pixelWidth">像素宽度 <output>pixel_width</output></label>
+            <input id="pixelWidth" class="text-input" type="number" min="1" max="1024" step="1" value="64">
+          </div>
+          <div class="control" title="默认自动按原图比例计算高度；取消自动后可以手动输入。">
+            <label for="pixelHeight">像素高度 <output>pixel_height</output></label>
+            <input id="pixelHeight" class="text-input" type="number" min="1" max="1024" step="1" value="64" disabled>
+          </div>
+          <label class="check-row">
+            <input id="autoPixelHeight" type="checkbox" checked>
+            <span>自动按比例计算高度</span>
+          </label>
+          <div class="control" title="限制 RGB 颜色数量。数值越小越有复古像素感，数值越大颜色越接近原图。透明度不会参与量化。">
+            <label for="colorCount">颜色数量 <output>color_count</output></label>
+            <select id="colorCount" class="text-input">
+              <option value="8">8</option>
+              <option value="16">16</option>
+              <option value="32">32</option>
+              <option value="64" selected>64</option>
+              <option value="128">128</option>
+              <option value="256">256</option>
+            </select>
+          </div>
+
+          <div id="pixelitPanel" class="advanced-panel" hidden>
+            <p class="section-title">Pixelit Style 参数</p>
+            <div class="control" title="Pixelit 风格的像素块大小。影响放大预览 PNG 的倍率。">
+              <label for="pixelitPixelSize">pixel_size</label>
+              <select id="pixelitPixelSize" class="text-input">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+                <option value="12">12</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+            <div class="control" title="Pixelit Style 自动取色时的最大颜色数。输入自定义 palette 后会改用 palette。">
+              <label for="pixelitMaxColors">max_colors</label>
+              <select id="pixelitMaxColors" class="text-input">
+                <option value="8">8</option>
+                <option value="16">16</option>
+                <option value="32">32</option>
+                <option value="64" selected>64</option>
+                <option value="128">128</option>
+                <option value="256">256</option>
+              </select>
+            </div>
+            <div class="control" title="逗号分隔颜色，例如 #000000,#ffffff,#2b6cff。有效颜色少于 2 个时回退到自动 median cut。">
+              <label for="pixelitPalette">palette</label>
+              <textarea id="pixelitPalette" class="text-input textarea-input" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></textarea>
+            </div>
+            <label class="check-row">
+              <input id="pixelitDither" type="checkbox">
+              <span>dither 抖动</span>
+            </label>
+            <label class="check-row">
+              <input id="pixelitGrayscale" type="checkbox">
+              <span>grayscale 灰度</span>
+            </label>
+            <div class="control" title="Pixelit Style 亮度。100 表示不变。">
+              <label for="pixelitBrightness">brightness <output id="pixelitBrightnessValue">100</output></label>
+              <input id="pixelitBrightness" type="range" min="0" max="200" step="1" value="100">
+            </div>
+            <div class="control" title="Pixelit Style 对比度。100 表示不变。">
+              <label for="pixelitContrast">contrast <output id="pixelitContrastValue">100</output></label>
+              <input id="pixelitContrast" type="range" min="0" max="200" step="1" value="100">
+            </div>
+            <div class="control" title="Pixelit Style 饱和度。100 表示不变。">
+              <label for="pixelitSaturation">saturation <output id="pixelitSaturationValue">100</output></label>
+              <input id="pixelitSaturation" type="range" min="0" max="200" step="1" value="100">
+            </div>
+          </div>
+
+          <details class="advanced-panel">
+            <summary>高级参数</summary>
+            <div class="control" title="放大预览和预览 PNG 使用的像素块倍率。比如 8 表示低分辨率图的每个像素会放大成 8×8 的方块。">
+              <label for="pixelBlockSize">像素块大小</label>
+              <select id="pixelBlockSize" class="text-input">
+                <option value="2">2</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+                <option value="12">12</option>
+                <option value="16">16</option>
+              </select>
+            </div>
+            <div class="control" title="开启后会用细小噪点过渡颜色，减少色带，但画面会更颗粒。">
+              <label>
+                <span>抖动 dither</span>
+                <input id="pixelDither" type="checkbox">
+              </label>
+            </div>
+            <div class="control" title="开启后会强制硬边输出：不做颜色渐变，不做抗锯齿，透明边缘会变成更干净的块状边。">
+              <label>
+                <span>硬边模式</span>
+                <input id="pixelHardEdges" type="checkbox" checked>
+              </label>
+            </div>
+            <div class="control" title="给透明边缘或高对比轮廓补一圈 1px 深色描边，让游戏素材轮廓更清楚。">
+              <label>
+                <span>像素描边</span>
+                <input id="pixelOutline" type="checkbox">
+              </label>
+            </div>
+            <div class="control" title="把半透明边缘压成透明或不透明。低于该 alpha 的像素会变透明，高于该值会变不透明。默认 100。">
+              <label for="alphaThreshold">Alpha 阈值 <output id="alphaThresholdValue">110</output></label>
+              <input id="alphaThreshold" type="range" min="0" max="255" step="1" value="110">
+            </div>
+            <div class="control" title="合并相近颜色。数值越高，越多相近颜色会被合并，可以减少脏色和残留渐变。默认 30。">
+              <label for="dirtyColorMerge">脏色合并 <output id="dirtyColorMergeValue">25</output></label>
+              <input id="dirtyColorMerge" type="range" min="0" max="100" step="1" value="25">
+            </div>
+            <div class="control" title="开启像素描边时使用的颜色。auto 会根据素材颜色自动选择深色描边。">
+              <label for="outlineColor">描边颜色 <output>outline_color</output></label>
+              <select id="outlineColor" class="text-input">
+                <option value="auto" selected>auto 自动</option>
+                <option value="black">black 黑色</option>
+                <option value="dark">dark 深灰</option>
+                <option value="custom">custom 自定义</option>
+              </select>
+            </div>
+            <div class="control" title="outline_color 选择 custom 时使用。">
+              <label for="customOutlineColor">自定义描边色</label>
+              <input id="customOutlineColor" class="text-input" type="color" value="#18181c">
+            </div>
+            <label class="check-row" title="VFX 模式。开启后，高亮发光区域不会被强行硬边化，尽量保留亮部渐变。">
+              <input id="preserveGlow" type="checkbox">
+              <span>保留发光 preserve_glow</span>
+            </label>
+            <div class="control" title="提高颜色鲜艳度。100 表示不变，低于 100 更灰，高于 100 更鲜艳。">
+              <label for="pixelSaturation">饱和度 <output id="pixelSaturationValue">100</output></label>
+              <input id="pixelSaturation" type="range" min="0" max="200" step="1" value="100">
+            </div>
+            <div class="control" title="提高明暗反差。100 表示不变，低于 100 更柔和，高于 100 更硬朗。">
+              <label for="pixelContrast">对比度 <output id="pixelContrastValue">100</output></label>
+              <input id="pixelContrast" type="range" min="0" max="200" step="1" value="100">
+            </div>
+            <div class="control" title="增强边缘清晰度。0 表示不锐化，数值越大边缘越硬。">
+              <label for="pixelSharpen">锐化 <output id="pixelSharpenValue">30</output></label>
+              <input id="pixelSharpen" type="range" min="0" max="100" step="1" value="30">
+            </div>
+            <div class="control" title="输入逗号分隔的颜色，例如 #000000,#ffffff,#2b6cff。有效颜色少于 2 个时会回退到自动取色。">
+              <label for="customPalette">自定义调色板</label>
+              <textarea id="customPalette" class="text-input textarea-input" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></textarea>
+            </div>
+          </details>
+        </section>
+
+        <section class="section">
+          <p class="section-title">下载</p>
+          <div class="button-grid">
+            <button id="downloadPixelActualButton" type="button" disabled>导出实际像素 PNG</button>
+            <button id="downloadPixelPreviewButton" type="button" disabled>导出放大预览 PNG</button>
+          </div>
+          <p id="pixelInfo" class="hint">未导入图片</p>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>原图</span>
+            <span id="pixelSourceInfo">未导入</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="pixelSourceCanvas"></canvas>
+            <div id="pixelSourceEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>像素风预览</span>
+            <span id="pixelPreviewInfo">未生成</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="pixelPreviewCanvas" class="pixel-preview-canvas"></canvas>
+            <div id="pixelPreviewEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/shared.js"></script>
+  <script src="js/cutout.js"></script>
+  <script src="js/video-sprite.js"></script>
+  <script src="js/pixelate.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
