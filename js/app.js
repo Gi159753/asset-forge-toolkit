@@ -19,7 +19,11 @@
     const sampleSwatch = document.getElementById("sampleSwatch");
     const zoomInput = document.getElementById("zoom");
     const zoomValue = document.getElementById("zoomValue");
+    const appRoot = document.querySelector(".app");
+    const homeView = document.getElementById("homeView");
     const toolTabs = document.querySelectorAll("[data-tool]");
+    const toolEntryButtons = document.querySelectorAll("[data-open-tool]");
+    const homeButtons = document.querySelectorAll("[data-home]");
     const cutoutTool = document.getElementById("cutoutTool");
     const spriteTool = document.getElementById("spriteTool");
     const pixelTool = document.getElementById("pixelTool");
@@ -131,19 +135,43 @@
     let pixelActualCanvas = document.createElement("canvas");
     let pixelPreviewScale = 1;
     let pixelFrame = 0;
+    const toolPanels = [cutoutTool, spriteTool, pixelTool];
+
+    function setActiveTool(targetId) {
+      homeView.hidden = true;
+      appRoot.classList.add("tool-open");
+      toolPanels.forEach((panel) => {
+        panel.hidden = panel.id !== targetId;
+      });
+      toolTabs.forEach((item) => {
+        const isActive = item.dataset.tool === targetId;
+        item.classList.toggle("active", isActive);
+        item.setAttribute("aria-pressed", String(isActive));
+      });
+    }
+
+    function showHome() {
+      homeView.hidden = false;
+      appRoot.classList.remove("tool-open");
+      toolPanels.forEach((panel) => {
+        panel.hidden = true;
+      });
+    }
 
     toolTabs.forEach((tab) => {
       tab.addEventListener("click", () => {
-        const targetId = tab.dataset.tool;
-        cutoutTool.hidden = targetId !== "cutoutTool";
-        spriteTool.hidden = targetId !== "spriteTool";
-        pixelTool.hidden = targetId !== "pixelTool";
-        toolTabs.forEach((item) => {
-          const isActive = item === tab;
-          item.classList.toggle("active", isActive);
-          item.setAttribute("aria-pressed", String(isActive));
-        });
+        setActiveTool(tab.dataset.tool);
       });
+    });
+
+    toolEntryButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        setActiveTool(button.dataset.openTool);
+      });
+    });
+
+    homeButtons.forEach((button) => {
+      button.addEventListener("click", showHome);
     });
 
     function onValueInput(input, handler) {

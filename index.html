@@ -18,7 +18,7 @@
         <p class="brand-subtitle">AI 素材转游戏资源工作台</p>
       </div>
       <div class="header-actions">
-        <sl-button-group class="tool-tabs" label="工具入口">
+        <sl-button-group class="tool-tabs" label="工具切换">
           <sl-button class="tool-tab active" data-tool="cutoutTool" aria-controls="cutoutTool" aria-pressed="true">抠图工具</sl-button>
           <sl-button class="tool-tab" data-tool="spriteTool" aria-controls="spriteTool" aria-pressed="false">视频转精灵图</sl-button>
           <sl-button class="tool-tab" data-tool="pixelTool" aria-controls="pixelTool" aria-pressed="false">像素风转换器</sl-button>
@@ -31,11 +31,83 @@
       </div>
     </header>
 
-    <main id="cutoutTool">
+    <main id="homeView" class="home-view">
+      <section class="home-hero">
+        <div class="home-copy">
+          <p class="eyebrow">Asset Forge Studio</p>
+          <h2>把 AI 素材变成可用的游戏资源</h2>
+          <p>抠图、抽帧、像素风转换，都在浏览器本地完成。选择一个入口开始处理素材。</p>
+          <div class="home-actions">
+            <sl-button variant="primary" data-open-tool="cutoutTool">开始处理素材</sl-button>
+            <sl-button variant="default" data-open-tool="pixelTool">转换像素风</sl-button>
+          </div>
+        </div>
+
+        <div class="studio-preview" aria-label="素材工作台预览">
+          <div class="preview-topbar">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="preview-grid">
+            <div class="preview-tile large">
+              <span>IMPORT</span>
+              <strong>source.png</strong>
+            </div>
+            <div class="preview-tile">
+              <span>CUTOUT</span>
+              <strong>Unlimited Size</strong>
+            </div>
+            <div class="preview-tile">
+              <span>SPRITE</span>
+              <strong>Unlimited Frames</strong>
+            </div>
+            <div class="preview-tile wide">
+              <span>EXPORT</span>
+              <strong>PNG / JSON / ZIP</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tool-entry-grid" aria-label="功能入口">
+        <button class="entry-card" type="button" data-open-tool="cutoutTool">
+          <span class="entry-kicker">Image</span>
+          <strong>图片抠图</strong>
+          <span>去掉背景，导出透明 PNG。</span>
+          <small>图标 / 角色 / 道具 / 技能素材</small>
+        </button>
+        <button class="entry-card" type="button" data-open-tool="spriteTool">
+          <span class="entry-kicker">Video</span>
+          <strong>视频转精灵图</strong>
+          <span>从 mp4/webm 抽帧，生成 spritesheet。</span>
+          <small>技能动画 / VFX / 临时动画素材</small>
+        </button>
+        <button class="entry-card" type="button" data-open-tool="pixelTool">
+          <span class="entry-kicker">Pixel</span>
+          <strong>像素风转换</strong>
+          <span>把普通图片转换成像素风素材。</span>
+          <small>AI 图 / 图标 / 独游素材</small>
+        </button>
+      </section>
+
+      <section class="home-footnotes" aria-label="工具特性">
+        <span>本地运行</span>
+        <span>无需上传</span>
+        <span>适合 Godot / Unity / Web 游戏</span>
+      </section>
+    </main>
+
+    <main id="cutoutTool" hidden>
       <aside>
         <section class="tool-intro">
-          <h2>抠图工具</h2>
-          <p>删除背景并导出透明 PNG，适合图标、角色、道具和技能素材。</p>
+          <div class="tool-intro-header">
+            <div>
+              <h2>抠图工具</h2>
+              <p>删除背景并导出透明 PNG，适合图标、角色、道具和技能素材。</p>
+            </div>
+            <sl-button size="small" data-home>返回工作台</sl-button>
+          </div>
         </section>
 
         <div id="dropZone" class="drop-zone">
@@ -141,8 +213,13 @@
     <main id="spriteTool" hidden>
       <aside>
         <section class="tool-intro">
-          <h2>视频转精灵图</h2>
-          <p>从视频均匀抽帧，生成序列帧、spritesheet 和 JSON 元数据。</p>
+          <div class="tool-intro-header">
+            <div>
+              <h2>视频转精灵图</h2>
+              <p>从视频均匀抽帧，生成序列帧、spritesheet 和 JSON 元数据。</p>
+            </div>
+            <sl-button size="small" data-home>返回工作台</sl-button>
+          </div>
         </section>
 
         <div id="videoDropZone" class="drop-zone">
@@ -208,8 +285,13 @@
     <main id="pixelTool" hidden>
       <aside>
         <section class="tool-intro">
-          <h2>像素风转换器</h2>
-          <p>把 AI 图、普通图片或伪像素图，转换成更接近游戏可用的像素风素材。</p>
+          <div class="tool-intro-header">
+            <div>
+              <h2>像素风转换器</h2>
+              <p>把 AI 图、普通图片或伪像素图，转换成更接近游戏可用的像素风素材。</p>
+            </div>
+            <sl-button size="small" data-home>返回工作台</sl-button>
+          </div>
         </section>
 
         <div id="pixelDropZone" class="drop-zone">
