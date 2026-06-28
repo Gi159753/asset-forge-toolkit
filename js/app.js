@@ -2,6 +2,7 @@
 // Loaded as a classic script so the tool still works from file://.
 
     const fileInput = document.getElementById("fileInput");
+    const fileButton = document.getElementById("fileButton");
     const exportButton = document.getElementById("exportButton");
     const dropZone = document.getElementById("dropZone");
     const sourceCanvas = document.getElementById("sourceCanvas");
@@ -13,6 +14,7 @@
     const sourceEmpty = document.getElementById("sourceEmpty");
     const previewEmpty = document.getElementById("previewEmpty");
     const modeHint = document.getElementById("modeHint");
+    const modeGroup = document.getElementById("modeGroup");
     const sampleText = document.getElementById("sampleText");
     const sampleSwatch = document.getElementById("sampleSwatch");
     const zoomInput = document.getElementById("zoom");
@@ -23,6 +25,7 @@
     const pixelTool = document.getElementById("pixelTool");
     const videoDropZone = document.getElementById("videoDropZone");
     const videoInput = document.getElementById("videoInput");
+    const videoFileButton = document.getElementById("videoFileButton");
     const videoPreview = document.getElementById("videoPreview");
     const videoEmpty = document.getElementById("videoEmpty");
     const videoInfo = document.getElementById("videoInfo");
@@ -43,6 +46,7 @@
     const downloadFramesButton = document.getElementById("downloadFramesButton");
     const pixelDropZone = document.getElementById("pixelDropZone");
     const pixelInput = document.getElementById("pixelInput");
+    const pixelFileButton = document.getElementById("pixelFileButton");
     const pixelPresetInput = document.getElementById("pixelPreset");
     const pixelAlgorithmInput = document.getElementById("pixelAlgorithm");
     const presetSyncSizeInput = document.getElementById("presetSyncSize");
@@ -134,9 +138,28 @@
         cutoutTool.hidden = targetId !== "cutoutTool";
         spriteTool.hidden = targetId !== "spriteTool";
         pixelTool.hidden = targetId !== "pixelTool";
-        toolTabs.forEach((item) => item.classList.toggle("active", item === tab));
+        toolTabs.forEach((item) => {
+          const isActive = item === tab;
+          item.classList.toggle("active", isActive);
+          item.setAttribute("aria-pressed", String(isActive));
+        });
       });
     });
+
+    function onValueInput(input, handler) {
+      input.addEventListener("input", handler);
+      input.addEventListener("sl-input", handler);
+      input.addEventListener("sl-change", handler);
+    }
+
+    function onValueChange(input, handler) {
+      input.addEventListener("change", handler);
+      input.addEventListener("sl-change", handler);
+    }
+
+    fileButton.addEventListener("click", () => fileInput.click());
+    videoFileButton.addEventListener("click", () => videoInput.click());
+    pixelFileButton.addEventListener("click", () => pixelInput.click());
 
     fileInput.addEventListener("change", () => {
       const file = fileInput.files && fileInput.files[0];
@@ -201,21 +224,19 @@
       if (file) loadPixelImageFile(file);
     });
 
-    document.querySelectorAll("input[name='mode']").forEach((input) => {
-      input.addEventListener("change", () => {
-        updateModeHint();
-        schedulePreview();
-      });
+    modeGroup.addEventListener("sl-change", () => {
+      updateModeHint();
+      schedulePreview();
     });
 
     Object.entries(sliders).forEach(([key, input]) => {
-      input.addEventListener("input", () => {
+      onValueInput(input, () => {
         values[key].value = input.value;
         schedulePreview();
       });
     });
 
-    zoomInput.addEventListener("input", applyZoom);
+    onValueInput(zoomInput, applyZoom);
 
     document.querySelectorAll("[data-zoom]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -229,7 +250,7 @@
     });
 
     [frameCountInput, sheetColumnsInput].forEach((input) => {
-      input.addEventListener("input", updateRowsHint);
+      onValueInput(input, updateRowsHint);
     });
 
     [
@@ -244,20 +265,20 @@
       pixelitMaxColorsInput,
       pixelitPaletteInput
     ].forEach((input) => {
-      input.addEventListener("input", schedulePixelPreview);
+      onValueInput(input, schedulePixelPreview);
     });
 
-    pixelPresetInput.addEventListener("change", () => {
+    onValueChange(pixelPresetInput, () => {
       applyPixelPreset(pixelPresetInput.value);
     });
 
-    pixelAlgorithmInput.addEventListener("change", () => {
+    onValueChange(pixelAlgorithmInput, () => {
       updatePixelAlgorithmPanel();
       schedulePixelPreview();
     });
 
     [pixelDitherInput, pixelHardEdgesInput, pixelOutlineInput, preserveGlowInput, autoPixelHeightInput, presetSyncSizeInput, pixelitDitherInput, pixelitGrayscaleInput].forEach((input) => {
-      input.addEventListener("change", () => {
+      onValueChange(input, () => {
         pixelHeightInput.disabled = autoPixelHeightInput.checked;
         if (autoPixelHeightInput.checked) updateAutoPixelHeight();
         schedulePixelPreview();
@@ -274,7 +295,7 @@
       [pixelitContrastInput, pixelitContrastValue],
       [pixelitSaturationInput, pixelitSaturationValue]
     ].forEach(([input, output]) => {
-      input.addEventListener("input", () => {
+      onValueInput(input, () => {
         output.value = input.value;
         schedulePixelPreview();
       });

@@ -287,5 +287,5 @@
 
 
     function getMode() {
-      return document.querySelector("input[name='mode']:checked").value;
+      return modeGroup.value;
     }
