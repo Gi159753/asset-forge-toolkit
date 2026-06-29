@@ -357,8 +357,10 @@ main[hidden] {
   border-radius: 12px;
   background: rgba(25, 30, 28, 0.94);
   color: var(--text);
+  text-decoration: none;
   text-align: left;
   box-shadow: var(--shadow-soft);
+  cursor: pointer;
 }
 
 .entry-card:hover {
@@ -366,6 +368,11 @@ main[hidden] {
   background:
     linear-gradient(135deg, rgba(79, 195, 154, 0.1), transparent 58%),
     rgba(30, 36, 33, 0.98);
+}
+
+.entry-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 
 .entry-kicker {
@@ -717,6 +724,12 @@ sl-progress-bar::part(indicator) {
 .button-grid {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.export-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
 }
 

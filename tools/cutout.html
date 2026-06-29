@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>抠图工具 - ASSET-FORGE-TOOLKIT</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../vendor/shoelace/dist/themes/dark.css">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../vendor/shoelace/shoelace.bundle.js"></script>
+</head>
+<body class="sl-theme-dark">
+  <div class="app tool-open">
+    <header>
+      <div class="brand">
+        <p class="eyebrow">Local Browser Tools</p>
+        <h1>ASSET-FORGE-TOOLKIT</h1>
+        <p class="brand-subtitle">AI 素材转游戏资源工作台</p>
+      </div>
+      <div class="header-actions">
+        <sl-button-group class="tool-tabs" label="工具切换">
+          <sl-button class="tool-tab active" href="cutout.html" aria-current="page">抠图工具</sl-button>
+          <sl-button class="tool-tab" href="sprite.html">视频转精灵图</sl-button>
+          <sl-button class="tool-tab" href="pixel.html">像素风转换器</sl-button>
+        </sl-button-group>
+        <div class="status-strip" aria-label="处理状态">
+          <sl-tag size="small" variant="neutral">本地处理</sl-tag>
+          <sl-tag size="small" variant="neutral">不上传素材</sl-tag>
+          <sl-tag size="small" variant="neutral">可离线使用</sl-tag>
+        </div>
+      </div>
+    </header>
+
+    <main id="cutoutTool">
+      <aside>
+        <section class="tool-intro">
+          <div class="tool-intro-header">
+            <div>
+              <h2>抠图工具</h2>
+              <p>删除背景并导出透明 PNG，适合图标、角色、道具和技能素材。</p>
+            </div>
+            <sl-button size="small" href="../index.html">返回工作台</sl-button>
+          </div>
+        </section>
+
+        <div id="dropZone" class="drop-zone">
+          <span>拖拽图片到这里</span>
+          <small>或点击选择图片按钮导入，也可以直接粘贴图片</small>
+        </div>
+
+        <div class="button-grid">
+          <input id="fileInput" type="file" accept="image/*">
+          <sl-button id="fileButton" variant="primary">选择图片</sl-button>
+          <div class="export-actions">
+            <sl-button id="exportButton" variant="default" disabled>导出 PNG</sl-button>
+            <sl-button id="copyButton" variant="default" disabled>复制</sl-button>
+          </div>
+        </div>
+        <p id="exportHelp" class="action-hint">导入图片后可导出透明 PNG。</p>
+
+        <section class="section">
+          <p class="section-title">模式</p>
+          <sl-radio-group id="modeGroup" name="mode" value="edge">
+            <sl-radio value="solid">纯色背景去除</sl-radio>
+            <sl-radio value="edge">边缘连通背景去除</sl-radio>
+          </sl-radio-group>
+          <p id="modeHint" class="hint">点击左侧原图取样背景色；按住 Shift 点击可追加多个颜色，只删除与图片边缘连通的相近背景。</p>
+          <div class="sample-row">
+            <span>取样颜色</span>
+            <span id="sampleText">#000000</span>
+            <span id="sampleSwatch" class="swatch-list" aria-hidden="true"></span>
+          </div>
+        </section>
+
+        <sl-details class="section compact-details" summary="参数调整">
+          <div class="control" title="threshold 阈值：决定哪些颜色算作背景。数值越大，工具越宽松，会删除更多接近背景的像素；数值越小，工具越严格，只删除最像背景的部分。如果主体也被擦掉了，就把它调小；如果背景残留很多，就把它调大。">
+            <div class="control-header">
+              <label for="threshold">阈值</label>
+              <output id="thresholdValue">42</output>
+            </div>
+            <sl-range id="threshold" min="0" max="255" value="42" tooltip="top"></sl-range>
+          </div>
+          <div class="control" title="feather 羽化：让透明边缘更柔和。数值越大，边缘会从透明到不透明慢慢过渡，看起来不那么硬；数值越小，边缘更利落但可能有锯齿。如果边缘太生硬，就调大一点；如果主体边缘变糊，就调小。">
+            <div class="control-header">
+              <label for="feather">羽化</label>
+              <output id="featherValue">18</output>
+            </div>
+            <sl-range id="feather" min="0" max="120" value="18" tooltip="top"></sl-range>
+          </div>
+          <div class="control" title="defringe 去边：减少主体边缘沾到的背景色。比如背景去除后边缘发黑，或纯色背景抠图后边缘带原背景颜色，可以调高它。数值太高可能让边缘颜色变怪，通常小幅调整就够。">
+            <div class="control-header">
+              <label for="defringe">去边</label>
+              <output id="defringeValue">25</output>
+            </div>
+            <sl-range id="defringe" min="0" max="100" value="25" tooltip="top"></sl-range>
+          </div>
+          <div class="control" title="alpha strength 透明强度：控制删除背景的力度。100 表示符合条件的背景尽量变透明；数值降低时，背景会保留一点半透明。一般导出透明图用 100；想保留轻微影子或烟雾时可以调低。">
+            <div class="control-header">
+              <label for="alphaStrength">透明强度</label>
+              <output id="alphaStrengthValue">100</output>
+            </div>
+            <sl-range id="alphaStrength" min="0" max="100" value="100" tooltip="top"></sl-range>
+          </div>
+        </sl-details>
+
+        <sl-details class="section compact-details" summary="查看缩放">
+          <div class="control" title="zoom 缩放：只改变屏幕上的查看大小，不会改变图片本身，也不会影响导出的 PNG 尺寸。导入图片时会自动适应窗口完整显示；放大后可以按住鼠标中键拖动查看细节。">
+            <div class="control-header">
+              <label for="zoom">缩放</label>
+              <output id="zoomValue">100%</output>
+            </div>
+            <sl-range id="zoom" min="1" max="400" step="1" value="100" tooltip="top"></sl-range>
+          </div>
+          <div class="zoom-buttons" aria-label="缩放快捷按钮">
+            <sl-button size="small" data-zoom="fit">适应</sl-button>
+            <sl-button size="small" data-zoom="100">100%</sl-button>
+            <sl-button size="small" data-zoom="200">200%</sl-button>
+            <sl-button size="small" data-zoom="400">400%</sl-button>
+          </div>
+        </sl-details>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>原图</span>
+            <span id="sourceInfo">未导入</span>
+          </div>
+          <div id="sourceWrap" class="canvas-wrap">
+            <canvas id="sourceCanvas"></canvas>
+            <div id="sourceEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>透明预览</span>
+            <span id="previewInfo">未导入</span>
+          </div>
+          <div id="previewWrap" class="canvas-wrap checker">
+            <canvas id="previewCanvas"></canvas>
+            <div id="previewEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/cutout.js"></script>
+  <script src="../js/pages/shared-page.js"></script>
+  <script src="../js/pages/cutout-page.js"></script>
+</body>
+</html>

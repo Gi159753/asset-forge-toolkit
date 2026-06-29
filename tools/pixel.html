@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>像素风转换器 - ASSET-FORGE-TOOLKIT</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../vendor/shoelace/dist/themes/dark.css">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../vendor/shoelace/shoelace.bundle.js"></script>
+</head>
+<body class="sl-theme-dark">
+  <div class="app tool-open">
+    <header>
+      <div class="brand">
+        <p class="eyebrow">Local Browser Tools</p>
+        <h1>ASSET-FORGE-TOOLKIT</h1>
+        <p class="brand-subtitle">AI 素材转游戏资源工作台</p>
+      </div>
+      <div class="header-actions">
+        <sl-button-group class="tool-tabs" label="工具切换">
+          <sl-button class="tool-tab" href="cutout.html">抠图工具</sl-button>
+          <sl-button class="tool-tab" href="sprite.html">视频转精灵图</sl-button>
+          <sl-button class="tool-tab active" href="pixel.html" aria-current="page">像素风转换器</sl-button>
+        </sl-button-group>
+        <div class="status-strip" aria-label="处理状态">
+          <sl-tag size="small" variant="neutral">本地处理</sl-tag>
+          <sl-tag size="small" variant="neutral">不上传素材</sl-tag>
+          <sl-tag size="small" variant="neutral">可离线使用</sl-tag>
+        </div>
+      </div>
+    </header>
+
+    <main id="pixelTool">
+      <aside>
+        <section class="tool-intro">
+          <div class="tool-intro-header">
+            <div>
+              <h2>像素风转换器</h2>
+              <p>把 AI 图、普通图片或伪像素图，转换成更接近游戏可用的像素风素材。</p>
+            </div>
+            <sl-button size="small" href="../index.html">返回工作台</sl-button>
+          </div>
+        </section>
+
+        <div id="pixelDropZone" class="drop-zone">
+          <span>拖拽 PNG / JPG / WebP 到这里</span>
+          <small>或点击选择图片导入</small>
+        </div>
+        <input id="pixelInput" type="file" accept="image/png,image/jpeg,image/webp">
+        <sl-button id="pixelFileButton" variant="primary" class="full-button">选择图片</sl-button>
+        <p class="action-hint">导入图片后会自动生成像素风预览。</p>
+
+        <section class="section">
+          <p class="section-title">核心参数</p>
+          <sl-select id="pixelPreset" label="像素风方向" value="modern">
+            <sl-option value="classic">Classic Pixel / 经典像素</sl-option>
+            <sl-option value="modern">Modern Pixel / 现代独游像素</sl-option>
+            <sl-option value="hd">HD Pixel / 高清像素</sl-option>
+            <sl-option value="vfx">VFX Pixel / 特效像素</sl-option>
+          </sl-select>
+          <sl-input id="pixelWidth" label="像素宽度" type="number" min="1" max="1024" step="1" value="64" help-text="默认 64"></sl-input>
+          <sl-select id="colorCount" label="颜色数量" value="64" help-text="默认 64">
+            <sl-option value="8">8</sl-option>
+            <sl-option value="16">16</sl-option>
+            <sl-option value="32">32</sl-option>
+            <sl-option value="64">64</sl-option>
+            <sl-option value="128">128</sl-option>
+            <sl-option value="256">256</sl-option>
+          </sl-select>
+        </section>
+
+        <sl-details class="section compact-details" summary="更多像素设置">
+          <sl-select id="pixelAlgorithm" label="算法模式" value="advanced">
+            <sl-option value="advanced">Advanced Clean</sl-option>
+            <sl-option value="pixelit">Pixelit Style</sl-option>
+          </sl-select>
+          <sl-checkbox id="presetSyncSize">预设同步尺寸</sl-checkbox>
+          <sl-input id="pixelHeight" label="像素高度" type="number" min="1" max="1024" step="1" value="64" disabled></sl-input>
+          <sl-checkbox id="autoPixelHeight" checked>自动按比例计算高度</sl-checkbox>
+
+          <div id="pixelitPanel" class="advanced-panel" hidden>
+            <p class="section-title">Pixelit Style 参数</p>
+            <sl-select id="pixelitPixelSize" label="pixel_size" value="8">
+              <sl-option value="2">2</sl-option>
+              <sl-option value="4">4</sl-option>
+              <sl-option value="6">6</sl-option>
+              <sl-option value="8">8</sl-option>
+              <sl-option value="12">12</sl-option>
+              <sl-option value="16">16</sl-option>
+            </sl-select>
+            <sl-select id="pixelitMaxColors" label="max_colors" value="64">
+              <sl-option value="8">8</sl-option>
+              <sl-option value="16">16</sl-option>
+              <sl-option value="32">32</sl-option>
+              <sl-option value="64">64</sl-option>
+              <sl-option value="128">128</sl-option>
+              <sl-option value="256">256</sl-option>
+            </sl-select>
+            <sl-textarea id="pixelitPalette" label="palette" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></sl-textarea>
+            <sl-checkbox id="pixelitDither">dither 抖动</sl-checkbox>
+            <sl-checkbox id="pixelitGrayscale">grayscale 灰度</sl-checkbox>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelitBrightness">brightness</label>
+                <output id="pixelitBrightnessValue">100</output>
+              </div>
+              <sl-range id="pixelitBrightness" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
+            </div>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelitContrast">contrast</label>
+                <output id="pixelitContrastValue">100</output>
+              </div>
+              <sl-range id="pixelitContrast" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
+            </div>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelitSaturation">saturation</label>
+                <output id="pixelitSaturationValue">100</output>
+              </div>
+              <sl-range id="pixelitSaturation" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
+            </div>
+          </div>
+
+          <sl-details class="advanced-panel" summary="高级参数">
+            <sl-select id="pixelBlockSize" label="像素块大小" value="8">
+              <sl-option value="2">2</sl-option>
+              <sl-option value="4">4</sl-option>
+              <sl-option value="6">6</sl-option>
+              <sl-option value="8">8</sl-option>
+              <sl-option value="12">12</sl-option>
+              <sl-option value="16">16</sl-option>
+            </sl-select>
+            <sl-checkbox id="pixelDither">抖动 dither</sl-checkbox>
+            <sl-checkbox id="pixelHardEdges" checked>硬边模式</sl-checkbox>
+            <sl-checkbox id="pixelOutline">像素描边</sl-checkbox>
+            <div class="control">
+              <div class="control-header">
+                <label for="alphaThreshold">Alpha 阈值</label>
+                <output id="alphaThresholdValue">110</output>
+              </div>
+              <sl-range id="alphaThreshold" min="0" max="255" step="1" value="110" tooltip="top"></sl-range>
+            </div>
+            <div class="control">
+              <div class="control-header">
+                <label for="dirtyColorMerge">脏色合并</label>
+                <output id="dirtyColorMergeValue">25</output>
+              </div>
+              <sl-range id="dirtyColorMerge" min="0" max="100" step="1" value="25" tooltip="top"></sl-range>
+            </div>
+            <sl-select id="outlineColor" label="描边颜色" value="auto">
+              <sl-option value="auto">auto 自动</sl-option>
+              <sl-option value="black">black 黑色</sl-option>
+              <sl-option value="dark">dark 深灰</sl-option>
+              <sl-option value="custom">custom 自定义</sl-option>
+            </sl-select>
+            <input id="customOutlineColor" class="native-color" type="color" value="#18181c" aria-label="自定义描边色">
+            <sl-checkbox id="preserveGlow">保留发光 preserve_glow</sl-checkbox>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelSaturation">饱和度</label>
+                <output id="pixelSaturationValue">100</output>
+              </div>
+              <sl-range id="pixelSaturation" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
+            </div>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelContrast">对比度</label>
+                <output id="pixelContrastValue">100</output>
+              </div>
+              <sl-range id="pixelContrast" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
+            </div>
+            <div class="control">
+              <div class="control-header">
+                <label for="pixelSharpen">锐化</label>
+                <output id="pixelSharpenValue">30</output>
+              </div>
+              <sl-range id="pixelSharpen" min="0" max="100" step="1" value="30" tooltip="top"></sl-range>
+            </div>
+            <sl-textarea id="customPalette" label="自定义调色板" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></sl-textarea>
+          </sl-details>
+        </sl-details>
+
+        <section class="section">
+          <p class="section-title">下载</p>
+          <div class="button-grid">
+            <sl-button id="downloadPixelActualButton" disabled>导出实际像素 PNG</sl-button>
+            <sl-button id="downloadPixelPreviewButton" disabled>导出放大预览 PNG</sl-button>
+          </div>
+          <p id="pixelInfo" class="hint">未导入图片</p>
+          <p class="action-hint">导入图片并生成预览后可导出。</p>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>原图</span>
+            <span id="pixelSourceInfo">未导入</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="pixelSourceCanvas"></canvas>
+            <div id="pixelSourceEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>像素风预览</span>
+            <span id="pixelPreviewInfo">未生成</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="pixelPreviewCanvas" class="pixel-preview-canvas"></canvas>
+            <div id="pixelPreviewEmpty" class="empty">等待图片</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/pixelate.js"></script>
+  <script src="../js/pages/shared-page.js"></script>
+  <script src="../js/pages/pixel-page.js"></script>
+</body>
+</html>

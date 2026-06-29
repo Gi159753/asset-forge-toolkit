@@ -7,7 +7,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="vendor/shoelace/dist/themes/dark.css">
   <link rel="stylesheet" href="styles.css">
-  <script type="module" src="vendor/shoelace/shoelace.bundle.js"></script>
+  <script src="vendor/shoelace/shoelace.bundle.js"></script>
 </head>
 <body class="sl-theme-dark">
   <div class="app">
@@ -19,9 +19,9 @@
       </div>
       <div class="header-actions">
         <sl-button-group class="tool-tabs" label="工具切换">
-          <sl-button class="tool-tab active" data-tool="cutoutTool" aria-controls="cutoutTool" aria-pressed="true">抠图工具</sl-button>
-          <sl-button class="tool-tab" data-tool="spriteTool" aria-controls="spriteTool" aria-pressed="false">视频转精灵图</sl-button>
-          <sl-button class="tool-tab" data-tool="pixelTool" aria-controls="pixelTool" aria-pressed="false">像素风转换器</sl-button>
+          <sl-button class="tool-tab" href="tools/cutout.html">抠图工具</sl-button>
+          <sl-button class="tool-tab" href="tools/sprite.html">视频转精灵图</sl-button>
+          <sl-button class="tool-tab" href="tools/pixel.html">像素风转换器</sl-button>
         </sl-button-group>
         <div class="status-strip" aria-label="处理状态">
           <sl-tag size="small" variant="neutral">本地处理</sl-tag>
@@ -38,8 +38,8 @@
           <h2>把 AI 素材变成可用的游戏资源</h2>
           <p>抠图、抽帧、像素风转换，都在浏览器本地完成。选择一个入口开始处理素材。</p>
           <div class="home-actions">
-            <sl-button variant="primary" data-open-tool="cutoutTool">开始处理素材</sl-button>
-            <sl-button variant="default" data-open-tool="pixelTool">转换像素风</sl-button>
+            <sl-button variant="primary" href="tools/cutout.html">开始处理素材</sl-button>
+            <sl-button variant="default" href="tools/pixel.html">转换像素风</sl-button>
           </div>
         </div>
 
@@ -71,24 +71,24 @@
       </section>
 
       <section class="tool-entry-grid" aria-label="功能入口">
-        <button class="entry-card" type="button" data-open-tool="cutoutTool">
+        <a class="entry-card" href="tools/cutout.html">
           <span class="entry-kicker">Image</span>
           <strong>图片抠图</strong>
           <span>去掉背景，导出透明 PNG。</span>
           <small>图标 / 角色 / 道具 / 技能素材</small>
-        </button>
-        <button class="entry-card" type="button" data-open-tool="spriteTool">
+        </a>
+        <a class="entry-card" href="tools/sprite.html">
           <span class="entry-kicker">Video</span>
           <strong>视频转精灵图</strong>
           <span>从 mp4/webm 抽帧，生成 spritesheet。</span>
           <small>技能动画 / VFX / 临时动画素材</small>
-        </button>
-        <button class="entry-card" type="button" data-open-tool="pixelTool">
+        </a>
+        <a class="entry-card" href="tools/pixel.html">
           <span class="entry-kicker">Pixel</span>
           <strong>像素风转换</strong>
           <span>把普通图片转换成像素风素材。</span>
           <small>AI 图 / 图标 / 独游素材</small>
-        </button>
+        </a>
       </section>
 
       <section class="home-footnotes" aria-label="工具特性">
@@ -97,383 +97,6 @@
         <span>适合 Godot / Unity / Web 游戏</span>
       </section>
     </main>
-
-    <main id="cutoutTool" hidden>
-      <aside>
-        <section class="tool-intro">
-          <div class="tool-intro-header">
-            <div>
-              <h2>抠图工具</h2>
-              <p>删除背景并导出透明 PNG，适合图标、角色、道具和技能素材。</p>
-            </div>
-            <sl-button size="small" data-home>返回工作台</sl-button>
-          </div>
-        </section>
-
-        <div id="dropZone" class="drop-zone">
-          <span>拖拽图片到这里</span>
-          <small>或点击选择图片按钮导入</small>
-        </div>
-
-        <div class="button-grid">
-          <input id="fileInput" type="file" accept="image/*">
-          <sl-button id="fileButton" variant="primary">选择图片</sl-button>
-          <sl-button id="exportButton" variant="default" disabled>导出 PNG</sl-button>
-        </div>
-        <p id="exportHelp" class="action-hint">导入图片后可导出透明 PNG。</p>
-
-        <section class="section">
-          <p class="section-title">模式</p>
-          <sl-radio-group id="modeGroup" name="mode" value="black">
-            <sl-radio value="black">黑底去除</sl-radio>
-            <sl-radio value="solid">纯色背景去除</sl-radio>
-            <sl-radio value="edge">边缘连通背景去除</sl-radio>
-          </sl-radio-group>
-          <p id="modeHint" class="hint">黑底模式会按像素亮度把接近黑色的区域转透明。</p>
-          <div class="sample-row">
-            <span>取样颜色</span>
-            <span id="sampleText">#000000</span>
-            <span id="sampleSwatch" class="swatch-list" aria-hidden="true"></span>
-          </div>
-        </section>
-
-        <sl-details class="section compact-details" summary="参数调整">
-          <div class="control" title="threshold 阈值：决定哪些颜色算作背景。数值越大，工具越宽松，会删除更多接近背景的像素；数值越小，工具越严格，只删除最像背景的部分。如果主体也被擦掉了，就把它调小；如果背景残留很多，就把它调大。">
-            <div class="control-header">
-              <label for="threshold">阈值</label>
-              <output id="thresholdValue">42</output>
-            </div>
-            <sl-range id="threshold" min="0" max="255" value="42" tooltip="top"></sl-range>
-          </div>
-          <div class="control" title="feather 羽化：让透明边缘更柔和。数值越大，边缘会从透明到不透明慢慢过渡，看起来不那么硬；数值越小，边缘更利落但可能有锯齿。如果边缘太生硬，就调大一点；如果主体边缘变糊，就调小。">
-            <div class="control-header">
-              <label for="feather">羽化</label>
-              <output id="featherValue">18</output>
-            </div>
-            <sl-range id="feather" min="0" max="120" value="18" tooltip="top"></sl-range>
-          </div>
-          <div class="control" title="defringe 去边：减少主体边缘沾到的背景色。比如黑底抠图后边缘发黑，或纯色背景抠图后边缘带原背景颜色，可以调高它。数值太高可能让边缘颜色变怪，通常小幅调整就够。">
-            <div class="control-header">
-              <label for="defringe">去边</label>
-              <output id="defringeValue">25</output>
-            </div>
-            <sl-range id="defringe" min="0" max="100" value="25" tooltip="top"></sl-range>
-          </div>
-          <div class="control" title="alpha strength 透明强度：控制删除背景的力度。100 表示符合条件的背景尽量变透明；数值降低时，背景会保留一点半透明。一般导出透明图用 100；想保留轻微影子或烟雾时可以调低。">
-            <div class="control-header">
-              <label for="alphaStrength">透明强度</label>
-              <output id="alphaStrengthValue">100</output>
-            </div>
-            <sl-range id="alphaStrength" min="0" max="100" value="100" tooltip="top"></sl-range>
-          </div>
-        </sl-details>
-
-        <sl-details class="section compact-details" summary="查看缩放">
-          <div class="control" title="zoom 缩放：只改变屏幕上的查看大小，不会改变图片本身，也不会影响导出的 PNG 尺寸。导入图片时会自动适应窗口完整显示；放大后可以按住鼠标中键拖动查看细节。">
-            <div class="control-header">
-              <label for="zoom">缩放</label>
-              <output id="zoomValue">100%</output>
-            </div>
-            <sl-range id="zoom" min="1" max="400" step="1" value="100" tooltip="top"></sl-range>
-          </div>
-          <div class="zoom-buttons" aria-label="缩放快捷按钮">
-            <sl-button size="small" data-zoom="fit">适应</sl-button>
-            <sl-button size="small" data-zoom="100">100%</sl-button>
-            <sl-button size="small" data-zoom="200">200%</sl-button>
-            <sl-button size="small" data-zoom="400">400%</sl-button>
-          </div>
-        </sl-details>
-      </aside>
-
-      <section class="stage">
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>原图</span>
-            <span id="sourceInfo">未导入</span>
-          </div>
-          <div id="sourceWrap" class="canvas-wrap">
-            <canvas id="sourceCanvas"></canvas>
-            <div id="sourceEmpty" class="empty">等待图片</div>
-          </div>
-        </div>
-
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>透明预览</span>
-            <span id="previewInfo">未导入</span>
-          </div>
-          <div id="previewWrap" class="canvas-wrap checker">
-            <canvas id="previewCanvas"></canvas>
-            <div id="previewEmpty" class="empty">等待图片</div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <main id="spriteTool" hidden>
-      <aside>
-        <section class="tool-intro">
-          <div class="tool-intro-header">
-            <div>
-              <h2>视频转精灵图</h2>
-              <p>从视频均匀抽帧，生成序列帧、spritesheet 和 JSON 元数据。</p>
-            </div>
-            <sl-button size="small" data-home>返回工作台</sl-button>
-          </div>
-        </section>
-
-        <div id="videoDropZone" class="drop-zone">
-          <span>拖拽 mp4 / webm 到这里</span>
-          <small>或点击选择视频导入</small>
-        </div>
-        <input id="videoInput" type="file" accept="video/mp4,video/webm">
-        <sl-button id="videoFileButton" variant="primary" class="full-button">选择视频</sl-button>
-
-        <sl-details class="section compact-details" summary="抽帧参数">
-          <sl-input id="animationName" label="动画名称" value="animation"></sl-input>
-          <sl-input id="frameCount" label="抽取帧数" type="number" min="1" max="240" step="1" value="24" help-text="默认 24"></sl-input>
-          <sl-input id="sheetColumns" label="每行列数" type="number" min="1" max="60" step="1" value="6" help-text="默认 6"></sl-input>
-          <sl-input id="rowsValue" label="自动行数" value="4" readonly></sl-input>
-          <sl-input id="sheetFps" label="播放帧率" type="number" min="1" max="240" step="1" value="24" help-text="默认 24"></sl-input>
-        </sl-details>
-
-        <section class="section">
-          <p class="section-title">生成</p>
-          <sl-button id="extractButton" variant="primary" disabled>抽帧生成</sl-button>
-          <p id="videoInfo" class="hint">未导入视频</p>
-          <p class="action-hint">导入视频后可抽帧生成精灵图。</p>
-          <sl-progress-bar id="extractProgress" value="0"></sl-progress-bar>
-          <p id="progressText" class="hint">等待开始</p>
-        </section>
-
-        <section class="section">
-          <p class="section-title">下载</p>
-          <div class="button-grid">
-            <sl-button id="downloadSheetButton" disabled>下载精灵图 PNG</sl-button>
-            <sl-button id="downloadJsonButton" disabled>下载 JSON</sl-button>
-            <sl-button id="downloadFramesButton" disabled>下载单帧 PNG zip</sl-button>
-          </div>
-          <p class="action-hint">生成完成后可下载。</p>
-        </section>
-      </aside>
-
-      <section class="stage">
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>视频预览</span>
-            <span id="videoPreviewInfo">未导入</span>
-          </div>
-          <div class="canvas-wrap">
-            <video id="videoPreview" controls muted playsinline></video>
-            <div id="videoEmpty" class="empty">等待视频</div>
-          </div>
-        </div>
-
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>精灵图预览</span>
-            <span id="sheetInfo">未生成</span>
-          </div>
-          <div class="canvas-wrap checker">
-            <canvas id="sheetCanvas" class="sheet-canvas"></canvas>
-            <div id="sheetEmpty" class="empty">等待生成</div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <main id="pixelTool" hidden>
-      <aside>
-        <section class="tool-intro">
-          <div class="tool-intro-header">
-            <div>
-              <h2>像素风转换器</h2>
-              <p>把 AI 图、普通图片或伪像素图，转换成更接近游戏可用的像素风素材。</p>
-            </div>
-            <sl-button size="small" data-home>返回工作台</sl-button>
-          </div>
-        </section>
-
-        <div id="pixelDropZone" class="drop-zone">
-          <span>拖拽 PNG / JPG / WebP 到这里</span>
-          <small>或点击选择图片导入</small>
-        </div>
-        <input id="pixelInput" type="file" accept="image/png,image/jpeg,image/webp">
-        <sl-button id="pixelFileButton" variant="primary" class="full-button">选择图片</sl-button>
-        <p class="action-hint">导入图片后会自动生成像素风预览。</p>
-
-        <section class="section">
-          <p class="section-title">核心参数</p>
-          <sl-select id="pixelPreset" label="像素风方向" value="modern">
-            <sl-option value="classic">Classic Pixel / 经典像素</sl-option>
-            <sl-option value="modern">Modern Pixel / 现代独游像素</sl-option>
-            <sl-option value="hd">HD Pixel / 高清像素</sl-option>
-            <sl-option value="vfx">VFX Pixel / 特效像素</sl-option>
-          </sl-select>
-          <sl-input id="pixelWidth" label="像素宽度" type="number" min="1" max="1024" step="1" value="64" help-text="默认 64"></sl-input>
-          <sl-select id="colorCount" label="颜色数量" value="64" help-text="默认 64">
-            <sl-option value="8">8</sl-option>
-            <sl-option value="16">16</sl-option>
-            <sl-option value="32">32</sl-option>
-            <sl-option value="64">64</sl-option>
-            <sl-option value="128">128</sl-option>
-            <sl-option value="256">256</sl-option>
-          </sl-select>
-        </section>
-
-        <sl-details class="section compact-details" summary="更多像素设置">
-          <sl-select id="pixelAlgorithm" label="算法模式" value="advanced">
-            <sl-option value="advanced">Advanced Clean</sl-option>
-            <sl-option value="pixelit">Pixelit Style</sl-option>
-          </sl-select>
-          <sl-checkbox id="presetSyncSize">预设同步尺寸</sl-checkbox>
-          <sl-input id="pixelHeight" label="像素高度" type="number" min="1" max="1024" step="1" value="64" disabled></sl-input>
-          <sl-checkbox id="autoPixelHeight" checked>自动按比例计算高度</sl-checkbox>
-
-          <div id="pixelitPanel" class="advanced-panel" hidden>
-            <p class="section-title">Pixelit Style 参数</p>
-            <sl-select id="pixelitPixelSize" label="pixel_size" value="8">
-              <sl-option value="2">2</sl-option>
-              <sl-option value="4">4</sl-option>
-              <sl-option value="6">6</sl-option>
-              <sl-option value="8">8</sl-option>
-              <sl-option value="12">12</sl-option>
-              <sl-option value="16">16</sl-option>
-            </sl-select>
-            <sl-select id="pixelitMaxColors" label="max_colors" value="64">
-              <sl-option value="8">8</sl-option>
-              <sl-option value="16">16</sl-option>
-              <sl-option value="32">32</sl-option>
-              <sl-option value="64">64</sl-option>
-              <sl-option value="128">128</sl-option>
-              <sl-option value="256">256</sl-option>
-            </sl-select>
-            <sl-textarea id="pixelitPalette" label="palette" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></sl-textarea>
-            <sl-checkbox id="pixelitDither">dither 抖动</sl-checkbox>
-            <sl-checkbox id="pixelitGrayscale">grayscale 灰度</sl-checkbox>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelitBrightness">brightness</label>
-                <output id="pixelitBrightnessValue">100</output>
-              </div>
-              <sl-range id="pixelitBrightness" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
-            </div>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelitContrast">contrast</label>
-                <output id="pixelitContrastValue">100</output>
-              </div>
-              <sl-range id="pixelitContrast" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
-            </div>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelitSaturation">saturation</label>
-                <output id="pixelitSaturationValue">100</output>
-              </div>
-              <sl-range id="pixelitSaturation" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
-            </div>
-          </div>
-
-          <sl-details class="advanced-panel" summary="高级参数">
-            <sl-select id="pixelBlockSize" label="像素块大小" value="8">
-              <sl-option value="2">2</sl-option>
-              <sl-option value="4">4</sl-option>
-              <sl-option value="6">6</sl-option>
-              <sl-option value="8">8</sl-option>
-              <sl-option value="12">12</sl-option>
-              <sl-option value="16">16</sl-option>
-            </sl-select>
-            <sl-checkbox id="pixelDither">抖动 dither</sl-checkbox>
-            <sl-checkbox id="pixelHardEdges" checked>硬边模式</sl-checkbox>
-            <sl-checkbox id="pixelOutline">像素描边</sl-checkbox>
-            <div class="control">
-              <div class="control-header">
-                <label for="alphaThreshold">Alpha 阈值</label>
-                <output id="alphaThresholdValue">110</output>
-              </div>
-              <sl-range id="alphaThreshold" min="0" max="255" step="1" value="110" tooltip="top"></sl-range>
-            </div>
-            <div class="control">
-              <div class="control-header">
-                <label for="dirtyColorMerge">脏色合并</label>
-                <output id="dirtyColorMergeValue">25</output>
-              </div>
-              <sl-range id="dirtyColorMerge" min="0" max="100" step="1" value="25" tooltip="top"></sl-range>
-            </div>
-            <sl-select id="outlineColor" label="描边颜色" value="auto">
-              <sl-option value="auto">auto 自动</sl-option>
-              <sl-option value="black">black 黑色</sl-option>
-              <sl-option value="dark">dark 深灰</sl-option>
-              <sl-option value="custom">custom 自定义</sl-option>
-            </sl-select>
-            <input id="customOutlineColor" class="native-color" type="color" value="#18181c" aria-label="自定义描边色">
-            <sl-checkbox id="preserveGlow">保留发光 preserve_glow</sl-checkbox>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelSaturation">饱和度</label>
-                <output id="pixelSaturationValue">100</output>
-              </div>
-              <sl-range id="pixelSaturation" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
-            </div>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelContrast">对比度</label>
-                <output id="pixelContrastValue">100</output>
-              </div>
-              <sl-range id="pixelContrast" min="0" max="200" step="1" value="100" tooltip="top"></sl-range>
-            </div>
-            <div class="control">
-              <div class="control-header">
-                <label for="pixelSharpen">锐化</label>
-                <output id="pixelSharpenValue">30</output>
-              </div>
-              <sl-range id="pixelSharpen" min="0" max="100" step="1" value="30" tooltip="top"></sl-range>
-            </div>
-            <sl-textarea id="customPalette" label="自定义调色板" placeholder="#000000,#ffffff,#2b6cff,#ffcc33"></sl-textarea>
-          </sl-details>
-        </sl-details>
-
-        <section class="section">
-          <p class="section-title">下载</p>
-          <div class="button-grid">
-            <sl-button id="downloadPixelActualButton" disabled>导出实际像素 PNG</sl-button>
-            <sl-button id="downloadPixelPreviewButton" disabled>导出放大预览 PNG</sl-button>
-          </div>
-          <p id="pixelInfo" class="hint">未导入图片</p>
-          <p class="action-hint">导入图片并生成预览后可导出。</p>
-        </section>
-      </aside>
-
-      <section class="stage">
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>原图</span>
-            <span id="pixelSourceInfo">未导入</span>
-          </div>
-          <div class="canvas-wrap checker">
-            <canvas id="pixelSourceCanvas"></canvas>
-            <div id="pixelSourceEmpty" class="empty">等待图片</div>
-          </div>
-        </div>
-
-        <div class="viewer">
-          <div class="viewer-header">
-            <span>像素风预览</span>
-            <span id="pixelPreviewInfo">未生成</span>
-          </div>
-          <div class="canvas-wrap checker">
-            <canvas id="pixelPreviewCanvas" class="pixel-preview-canvas"></canvas>
-            <div id="pixelPreviewEmpty" class="empty">等待图片</div>
-          </div>
-        </div>
-      </section>
-    </main>
   </div>
-
-  <script src="js/shared.js"></script>
-  <script src="js/cutout.js"></script>
-  <script src="js/video-sprite.js"></script>
-  <script src="js/pixelate.js"></script>
-  <script src="js/app.js"></script>
 </body>
 </html>

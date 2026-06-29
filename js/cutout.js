@@ -19,8 +19,8 @@
         sourceEmpty.hidden = true;
         previewEmpty.hidden = true;
         exportButton.disabled = false;
+        copyButton.disabled = false;
 
-        if (getMode() === "black") sampledColors = [{ r: 0, g: 0, b: 0 }];
         requestAnimationFrame(fitImageToView);
         updateModeHint();
         updateSampleDisplay();
@@ -171,9 +171,7 @@
         const r = source[index];
         const g = source[index + 1];
         const b = source[index + 2];
-        const distance = mode === "black"
-          ? Math.max(r, g, b)
-          : nearestSampleDistance(r, g, b);
+        const distance = nearestSampleDistance(r, g, b);
         const removal = removalAmount(distance, threshold, feather) * strength;
         if (removal <= 0) continue;
 
@@ -250,11 +248,8 @@
 
     function updateModeHint() {
       const mode = getMode();
-      sourceCanvas.classList.toggle("pickable", mode !== "black");
-      if (mode === "black") {
-        sampledColors = [{ r: 0, g: 0, b: 0 }];
-        modeHint.textContent = "黑底模式会按像素亮度把接近黑色的区域转透明。";
-      } else if (mode === "solid") {
+      sourceCanvas.classList.add("pickable");
+      if (mode === "solid") {
         modeHint.textContent = "点击左侧原图取样背景色；按住 Shift 点击可以追加多个背景色。";
       } else {
         modeHint.textContent = "点击左侧原图取样背景色；按住 Shift 点击可追加多个颜色，只删除与图片边缘连通的相近背景。";

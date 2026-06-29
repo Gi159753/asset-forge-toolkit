@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>视频转精灵图 - ASSET-FORGE-TOOLKIT</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../vendor/shoelace/dist/themes/dark.css">
+  <link rel="stylesheet" href="../styles.css">
+  <script src="../vendor/shoelace/shoelace.bundle.js"></script>
+</head>
+<body class="sl-theme-dark">
+  <div class="app tool-open">
+    <header>
+      <div class="brand">
+        <p class="eyebrow">Local Browser Tools</p>
+        <h1>ASSET-FORGE-TOOLKIT</h1>
+        <p class="brand-subtitle">AI 素材转游戏资源工作台</p>
+      </div>
+      <div class="header-actions">
+        <sl-button-group class="tool-tabs" label="工具切换">
+          <sl-button class="tool-tab" href="cutout.html">抠图工具</sl-button>
+          <sl-button class="tool-tab active" href="sprite.html" aria-current="page">视频转精灵图</sl-button>
+          <sl-button class="tool-tab" href="pixel.html">像素风转换器</sl-button>
+        </sl-button-group>
+        <div class="status-strip" aria-label="处理状态">
+          <sl-tag size="small" variant="neutral">本地处理</sl-tag>
+          <sl-tag size="small" variant="neutral">不上传素材</sl-tag>
+          <sl-tag size="small" variant="neutral">可离线使用</sl-tag>
+        </div>
+      </div>
+    </header>
+
+    <main id="spriteTool">
+      <aside>
+        <section class="tool-intro">
+          <div class="tool-intro-header">
+            <div>
+              <h2>视频转精灵图</h2>
+              <p>从视频均匀抽帧，生成序列帧、spritesheet 和 JSON 元数据。</p>
+            </div>
+            <sl-button size="small" href="../index.html">返回工作台</sl-button>
+          </div>
+        </section>
+
+        <div id="videoDropZone" class="drop-zone">
+          <span>拖拽 mp4 / webm 到这里</span>
+          <small>或点击选择视频导入</small>
+        </div>
+        <input id="videoInput" type="file" accept="video/mp4,video/webm">
+        <sl-button id="videoFileButton" variant="primary" class="full-button">选择视频</sl-button>
+
+        <sl-details class="section compact-details" summary="抽帧参数">
+          <sl-input id="animationName" label="动画名称" value="animation"></sl-input>
+          <sl-input id="frameCount" label="抽取帧数" type="number" min="1" max="240" step="1" value="24" help-text="默认 24"></sl-input>
+          <sl-input id="sheetColumns" label="每行列数" type="number" min="1" max="60" step="1" value="6" help-text="默认 6"></sl-input>
+          <sl-input id="rowsValue" label="自动行数" value="4" readonly></sl-input>
+          <sl-input id="sheetFps" label="播放帧率" type="number" min="1" max="240" step="1" value="24" help-text="默认 24"></sl-input>
+        </sl-details>
+
+        <section class="section">
+          <p class="section-title">生成</p>
+          <sl-button id="extractButton" variant="primary" disabled>抽帧生成</sl-button>
+          <p id="videoInfo" class="hint">未导入视频</p>
+          <p class="action-hint">导入视频后可抽帧生成精灵图。</p>
+          <sl-progress-bar id="extractProgress" value="0"></sl-progress-bar>
+          <p id="progressText" class="hint">等待开始</p>
+        </section>
+
+        <section class="section">
+          <p class="section-title">下载</p>
+          <div class="button-grid">
+            <sl-button id="downloadSheetButton" disabled>下载精灵图 PNG</sl-button>
+            <sl-button id="downloadJsonButton" disabled>下载 JSON</sl-button>
+            <sl-button id="downloadFramesButton" disabled>下载单帧 PNG zip</sl-button>
+          </div>
+          <p class="action-hint">生成完成后可下载。</p>
+        </section>
+      </aside>
+
+      <section class="stage">
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>视频预览</span>
+            <span id="videoPreviewInfo">未导入</span>
+          </div>
+          <div class="canvas-wrap">
+            <video id="videoPreview" controls muted playsinline></video>
+            <div id="videoEmpty" class="empty">等待视频</div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <div class="viewer-header">
+            <span>精灵图预览</span>
+            <span id="sheetInfo">未生成</span>
+          </div>
+          <div class="canvas-wrap checker">
+            <canvas id="sheetCanvas" class="sheet-canvas"></canvas>
+            <div id="sheetEmpty" class="empty">等待生成</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/shared.js"></script>
+  <script src="../js/video-sprite.js"></script>
+  <script src="../js/pages/shared-page.js"></script>
+  <script src="../js/pages/sprite-page.js"></script>
+</body>
+</html>

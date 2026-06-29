@@ -10792,7 +10792,7 @@ var require_shoelace_entry = __commonJS({
     init_textarea();
   }
 });
-export default require_shoelace_entry();
+require_shoelace_entry();
 /*! Bundled license information:
 
 @lit/reactive-element/css-tag.js:
